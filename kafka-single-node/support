@@ -1,0 +1,118 @@
+**************************** Confluence containers ***********************************************************
+git clone https://github.com/confluentinc/cp-docker-images
+
+docker-compose logs zookeeper | grep -i binding
+docker-compose logs kafka | grep -i started
+
+docker-compose exec kafka kafka-topics --create --topic review-topic --partitions 3 --replication-factor 1 --if-not-exists --zookeeper localhost:2181
+
+
+docker-compose exec kafka  \
+  kafka-topics --describe --topic review-topic --zookeeper localhost:2181
+  
+
+docker-compose exec kafka  \
+  bash -c "seq 100 | kafka-console-producer --request-required-acks 1 --broker-list localhost:29092 --topic meu-topico-legal && echo 'Produced 100 messages.'"
+  
+
+docker-compose exec kafka  \
+  kafka-console-consumer --bootstrap-server localhost:9092 --topic review-topic --partition 0  
+
+
+
+-- monitor
+
+docker run -d \
+  --name=control-center \
+  --net=confluent \
+  --ulimit nofile=16384:16384 \
+  -p 9021:9021 \
+  -v /tmp/control-center/data:/var/lib/confluent-control-center \
+  -e CONTROL_CENTER_ZOOKEEPER_CONNECT=zookeeper:2181 \
+  -e CONTROL_CENTER_BOOTSTRAP_SERVERS=kafka:9092 \
+  -e CONTROL_CENTER_REPLICATION_FACTOR=1 \
+  -e CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS=1 \
+  -e CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS=1 \
+  -e CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS=2 \
+  -e CONTROL_CENTER_CONNECT_CLUSTER=http://kafka-connect:8082 \
+  confluentinc/cp-enterprise-control-center:5.0.0
+
+
+
+
+**************************************************************************************************************
+docker-compose exec kafka kafka-topics --create --topic review-topic --partitions 3 --replication-factor 1 --if-not-exists --zookeeper localhost:2181
+docker-compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic review-topic --partition 0
+docker-compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic review-topic --partition 1
+docker-compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic review-topic --partition 2
+
+
+
+
+
+
+links ref
+http://cloudurable.com/blog/kafka-tutorial-kafka-producer-advanced-java-examples/index.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*************************************** Comandos Básico  *************************************************
+/opt/development/kafka
+
+1. Inicia o zookeeper.
+
+ ./bin/zookeeper-server-start.sh ./config/zookeeper.properties 
+
+
+2. Inicia o servidor kafka
+
+./bin/kafka-server-start.sh config/server.properties 
+
+3. Inicia o console para produzir mensagens para um dado tópico.
+
+./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic vtjava
+
+4. Inicia o consumidor de mensagens dado o tópico.
+
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --freginning --topic vtest
+
+5. Listar Topicos
+./bin/kafka-topics.sh --list --zookeeper localhost:2181
+
+6. Criar um topico
+
+./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 14 --topic meu-topico-nome
+
+7. Deletar topico 
+
+./bni/kafka-topics.sh --delete --zookeeper localhost:2181 --topic your_topic_name
+
+************************************************************************************************************
+
+
+
